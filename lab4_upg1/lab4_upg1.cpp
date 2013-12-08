@@ -1,6 +1,6 @@
 // lab4_upg1.cpp
 // Program för att kasta ett givet nummer tärningar och beräkna statistik
-// Thomas Nordenmark 2013-12-03
+// Thomas Nordenmark 2013-12-07
 // Ver 0.1
 //------------------------------------------------------------------------------
 #include <iostream> // cin, cout
@@ -8,11 +8,14 @@
 #include <iomanip> // setw
 using namespace std;
 
-//---Funktionsdeklarationer---
-// Funktion som returnar ett slumptal
-int rollDice(int dice);
+// ======================
+// Funktionsdeklarationer
+// ======================
+int rollDice(int dice); // Returnera ett slumptal
 
-//---Huvudprogram---
+// ============
+// Huvudprogram
+// ============
 int main()
 {
     srand(time(NULL)); // Initiera slumpgeneratorn
@@ -85,12 +88,14 @@ int main()
          << setw(10) << "Femmor %: " << (double)fives / (double)numberofrolls * 100 << endl
          << setw(10) << "Sexor %: " << (double)sixes / (double)numberofrolls * 100 << endl;
 
-
     return 0;
 }
 
-//---Funktionsdefinitioner---
-// Funktion för att rulla tärningen = returna ett slumptal
+// =====================
+// Funktionsdefinitioner
+// =====================
+
+// Funktion för att rulla tärningen = returnera ett slumptal
 int rollDice(int dice)
 {
     return rand() % dice + 1;

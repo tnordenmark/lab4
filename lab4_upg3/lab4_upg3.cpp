@@ -1,5 +1,5 @@
-// lab4_upg2.cpp
-// Program för att beräkna samtalstaxa för RingPling2 004 AB
+// lab4_upg3.cpp
+// Program som kombinerar uppgift 1 och 2 till ett program
 // Thomas Nordenmark 2013-12-08
 // Ver 0.1
 //------------------------------------------------------------------------------
@@ -7,6 +7,7 @@
 #include <sstream> // stringstream
 #include <iomanip> // setw, setprecision
 #include <string> // string, getline
+#include <cstdlib> // system, srand, rand
 using namespace std;
 
 // ==================
@@ -19,9 +20,14 @@ const double LANGD_RABATT = 0.85; // Samtal längre än 30 min, 15% rabatt
 const string START_TID = "08:00"; // Starttid för fulltaxa
 const string STOPP_TID = "18:30"; // Stopptid för fulltaxa
 
-// ======================
-// Funktionsdeklarationer
-// ======================
+// =====================
+// Funktionsdklarationer
+// =====================
+void clear_screen(); // Fulhack för att rensa skärm
+void visaMeny(); // Visa huvudmeny
+void diceSim(); // Tärningsprogrammet
+void teleTaxa(); // RingPling-programmet
+int rollDice(int dice); // Returnera ett slumptal
 bool kollaTid(string tid); // Kontrollera tidsformat
 char menyVal(); // Hantera valet att köra programmet igen eller avsluta
 double totalKostnad(string start, string stopp); // Beräkna toltalkostnad för samtal
@@ -32,6 +38,149 @@ int antalMinuter(string tid); // Konvertera tider till minuter
 // ============
 int main()
 {
+    clear_screen(); // Fulhack in action!
+
+    int menyval; // Variabel för att lagra menyvalet
+
+    // Upprepa så länge menyval inte är 3
+    do
+    {
+        cout << endl;
+        visaMeny(); // Visa huvudmenyn
+
+        cin >> menyval; // Läs in menyvalet
+        cin.get(); // Läs bort returntecknet så att det inte ligger smuts i tuben
+
+        // Switch för att hantera de olika menyvalen
+        switch(menyval)
+        {
+            case 1:
+                diceSim(); // Anropa tärningsfunktionen
+                break; // Break så att inte switch forsätter exekveras nedåt
+            case 2:
+                teleTaxa(); // Anropa RingPling
+                break; // Break så att inte switch fortsätter exekveras nedåt
+            case 3:
+                cout << "Avslutar program..." << endl;
+                return 0;
+        }
+    }while(menyval != 3);
+
+    return 0;
+}
+
+// =====================
+// Funktionsdefinitioner
+// =====================
+
+// Fulhack för att kunna rensa skärm under både Windows- och POSIX-system,
+// inget jag personligen skulle använda jätteofta, men en kravspecifikation
+// är en kravspecifikation. Hoppas det fungerar ;-)
+void clear_screen()
+{
+// Om Windows
+#ifdef WINDOWS
+    system("CLS");
+// Annars antag POSIX-kompatibelt system
+#else
+    system("clear");
+#endif
+}
+
+// Visa huvudmeny
+void visaMeny()
+{
+    cout << "================" << endl;
+    cout << "   Huvudmeny" << endl;
+    cout << "1. Kasta tärning" << endl;
+    cout << "2. RingPling" << endl;
+    cout << "3. Avsluta" << endl;
+    cout << "================" << endl;
+}
+
+// Program för att kasta givet antal tärningar
+void diceSim()
+{
+    srand(time(NULL)); // Initiera slumpgeneratorn
+
+    const int dice = 6; // Antalet sidor på tärningen, egentligen överflödigt
+    int rolls; // Antal tärningar som ska kastas
+    // Variabler för att lagra de olika tärningarnas förekomst
+    int ones = 0, twoes = 0, threes = 0, fours = 0, fives = 0, sixes = 0;
+    int result; // Variabel för att lagra slumptalet från funktionen rollDice()
+    int numberofrolls = 0; // Räknare för att lagra antalet tärningskast
+
+    // Ledtext är kul, hämta antalet kast samt rensa buffern utan radbrytning
+    cout << "Hur många gånger vill du kasta tärningen? " << flush;
+    cin >> rolls;
+
+    // Loop för att kasta tärningen angivet antal gånger
+    for(int i = 0; i < rolls; i++)
+    {
+        // Anropa funktionen och lagra resultatet i result
+        result = rollDice(dice);
+        // Skriv ut resultat för tärningsnummer
+        cout << "Tärning " << setw(2) << numberofrolls + 1 << ": " << result << endl;
+
+        // Uppdatera räknaren för antalet tärningskast
+        numberofrolls++;
+
+        // Uppdatera räknare för varje enskild tärning
+        if(result == 1)
+            ones++;
+        else if(result == 2)
+            twoes++;
+        else if(result == 3)
+            threes++;
+        else if(result == 4)
+            fours++;
+        else if(result == 5)
+            fives++;
+        else if(result == 6)
+            sixes++;
+    }
+
+    // Vänsterjustering gäller tills annat anges
+    cout << left;
+
+    // Massor med ledtext, kul!
+    cout << endl << "===================" << endl;
+    cout << "Antal tärningskast: " << numberofrolls << endl;
+    cout << "===================" << endl;
+
+    cout << endl << "Tärningarnas resultat" << endl;
+    cout << "=====================" << endl;
+
+    // De enskilda tärningarnas resultat
+    cout << endl << setw(8) << "Ettor: " << ones << endl
+         << setw(9) << "Tvåor: " << twoes << endl // setw(9) för att å inte räknas
+         << setw(8) << "Treor: " << threes << endl
+         << setw(8) << "Fyror: " << fours << endl
+         << setw(8) << "Femmor: " << fives << endl
+         << setw(8) << "Sexor: " << sixes << endl;
+
+    // Ledtext igen, kul kul!
+    cout << endl << "Relativ frekvens i %" << endl;
+    cout << "====================" << endl;
+
+    // Tärningarnas relativa frekvens
+    cout << endl << setw(10) << "Ettor %: " << (double)ones / (double)numberofrolls * 100 << endl
+         << setw(11) << "Tvåor %: " << (double)twoes / (double)numberofrolls * 100 << endl
+         << setw(10) << "Treor %: " << (double)threes / (double)numberofrolls * 100 << endl
+         << setw(10) << "Fyror %: " << (double)fours / (double)numberofrolls * 100 << endl
+         << setw(10) << "Femmor %: " << (double)fives / (double)numberofrolls * 100 << endl
+         << setw(10) << "Sexor %: " << (double)sixes / (double)numberofrolls * 100 << endl;
+}
+
+// Funktion för att rulla tärningen = returnera ett slumptal
+int rollDice(int dice)
+{
+    return rand() % dice + 1;
+}
+
+// RingPling-programmet
+void teleTaxa()
+{
     string start, stopp; // Användarens tidsangivelser
     bool giltigt_format; // Lagra om det inmatade tidsformatet är true (ok) eller false (ej ok)
     char menyval; // char för valet att avsluta eller köra programmet igen
@@ -40,7 +189,7 @@ int main()
 
     // Huvudloop, upprepa så länge menyval är j
     do
-    {        
+    {
         // Upprepa så länge formatet på angiven starttid är felaktigt
         do
         {
@@ -85,13 +234,7 @@ int main()
             menyval = menyVal();
         }while(!(menyval == 'J' || menyval == 'N'));
     }while(menyval == 'J');
-
-    return 0;
 }
-
-// =====================
-// Funktionsdefinitioner
-// =====================
 
 // Kontrollera att inmatat tidformat är korrekt
 bool kollaTid(string tid)
