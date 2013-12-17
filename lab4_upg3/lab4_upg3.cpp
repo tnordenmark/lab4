@@ -7,7 +7,9 @@
 #include <sstream> // stringstream
 #include <iomanip> // setw, setprecision
 #include <string> // string, getline
-#include <cstdlib> // system, srand, rand
+#include <cstdlib> // system
+#include <random> // default_random_engine
+#include <functional> // bind
 using namespace std;
 
 // ==================
@@ -27,7 +29,6 @@ void clear_screen(); // Fulhack för att rensa skärm
 void visaMeny(); // Visa huvudmeny
 void diceSim(); // Tärningsprogrammet
 void teleTaxa(); // RingPling-programmet
-int rollDice(int dice); // Returnera ett slumptal
 bool kollaTid(string tid); // Kontrollera tidsformat
 char menyVal(); // Hantera valet att köra programmet igen eller avsluta
 double totalKostnad(string start, string stopp); // Beräkna toltalkostnad för samtal
@@ -101,7 +102,11 @@ void visaMeny()
 // Program för att kasta givet antal tärningar
 void diceSim()
 {
-    srand(time(NULL)); // Initiera slumpgeneratorn
+    // Initiera slumpdistributörsobjektet generator
+    default_random_engine generator(static_cast<unsigned>(time(0)));
+    uniform_int_distribution<int> random(1, 6); // Slumpa i itervallet 1-6
+    // Slå ihop slumpgeneratorn till en funktion för enklare användning
+    auto rollDice = bind(random, generator);
 
     const int dice = 6; // Antalet sidor på tärningen, egentligen överflödigt
     int rolls; // Antal tärningar som ska kastas
@@ -118,7 +123,7 @@ void diceSim()
     for(int i = 0; i < rolls; i++)
     {
         // Anropa funktionen och lagra resultatet i result
-        result = rollDice(dice);
+        result = rollDice();
         // Skriv ut resultat för tärningsnummer
         cout << "Tärning " << setw(2) << numberofrolls + 1 << ": " << result << endl;
 
@@ -170,12 +175,6 @@ void diceSim()
          << setw(10) << "Fyror %: " << (double)fours / (double)numberofrolls * 100 << endl
          << setw(10) << "Femmor %: " << (double)fives / (double)numberofrolls * 100 << endl
          << setw(10) << "Sexor %: " << (double)sixes / (double)numberofrolls * 100 << endl;
-}
-
-// Funktion för att rulla tärningen = returnera ett slumptal
-int rollDice(int dice)
-{
-    return rand() % dice + 1;
 }
 
 // RingPling-programmet

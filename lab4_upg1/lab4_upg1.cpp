@@ -4,23 +4,27 @@
 // Ver 0.1
 //------------------------------------------------------------------------------
 #include <iostream> // cin, cout
-#include <cstdlib> // srand, rand
+#include <random> // default_random_engine
 #include <iomanip> // setw
+#include <functional> // bind
 using namespace std;
 
 // ======================
 // Funktionsdeklarationer
 // ======================
-int rollDice(int dice); // Returnera ett slumptal
+int rollDice(); // Returnera ett slumptal
 
 // ============
 // Huvudprogram
 // ============
 int main()
 {
-    srand(time(NULL)); // Initiera slumpgeneratorn
+    // Initiera slumpdistributörsobjektet generator
+    default_random_engine generator(static_cast<unsigned>(time(0)));
+    uniform_int_distribution<int> random(1, 6); // Slumpa i itervallet 1-6
+    // Slå ihop slumpgeneratorn till en funktion för enklare användning
+    auto rollDice = bind(random, generator);
 
-    const int dice = 6; // Antalet sidor på tärningen, egentligen överflödigt
     int rolls; // Antal tärningar som ska kastas
     // Variabler för att lagra de olika tärningarnas förekomst
     int ones = 0, twoes = 0, threes = 0, fours = 0, fives = 0, sixes = 0;
@@ -35,7 +39,7 @@ int main()
     for(int i = 0; i < rolls; i++)
     {
         // Anropa funktionen och lagra resultatet i result
-        result = rollDice(dice);
+        result = rollDice();
         // Skriv ut resultat för tärningsnummer
         cout << "Tärning " << setw(2) << numberofrolls + 1 << ": " << result << endl;
 
@@ -89,14 +93,4 @@ int main()
          << setw(10) << "Sexor %: " << (double)sixes / (double)numberofrolls * 100 << endl;
 
     return 0;
-}
-
-// =====================
-// Funktionsdefinitioner
-// =====================
-
-// Funktion för att rulla tärningen = returnera ett slumptal
-int rollDice(int dice)
-{
-    return rand() % dice + 1;
 }
